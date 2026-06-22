@@ -3,7 +3,7 @@ GO
 
 USE DataWarehouse;
 
-Bảng DimCustomer
+--Bảng DimCustomer
 
 CREATE TABLE DimCustomer (
     CustomerKey INT IDENTITY(1,1) PRIMARY KEY,
@@ -11,7 +11,7 @@ CREATE TABLE DimCustomer (
     CustomerName NVARCHAR(255),
     Segment NVARCHAR(100)
 );
-bảng DimProduct
+-- bảng DimProduct
 
 CREATE TABLE DimProduct (
     ProductKey INT IDENTITY(1,1) PRIMARY KEY,
@@ -20,7 +20,7 @@ CREATE TABLE DimProduct (
     Category NVARCHAR(100),
     SubCategory NVARCHAR(100)
 );
-bảng DimLocation
+--bảng DimLocation
 
 CREATE TABLE DimLocation (
     LocationKey INT IDENTITY(1,1) PRIMARY KEY,
@@ -29,13 +29,13 @@ CREATE TABLE DimLocation (
     State NVARCHAR(100),
     City NVARCHAR(100)
 );
-bảng DimShipMode
+--bảng DimShipMode
 
 CREATE TABLE DimShipMode (
     ShipModeKey INT IDENTITY(1,1) PRIMARY KEY,
     ShipMode NVARCHAR(100) UNIQUE
 );
-bảng DimDate
+--bảng DimDate
 
 CREATE TABLE DimDate (
     DateKey INT PRIMARY KEY,
@@ -45,7 +45,7 @@ CREATE TABLE DimDate (
     MonthNo INT,
     MonthName NVARCHAR(20)
 );
-bảng chính Fact Table
+--bảng chính Fact Table
 
 CREATE TABLE FactSales (
 
