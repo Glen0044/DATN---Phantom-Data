@@ -81,65 +81,7 @@ def handle_missing(df: pd.DataFrame) -> pd.DataFrame:
     _validate_schema(df, "handle_missing")
     return df
 
-def standardize_data(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Chuẩn hóa dữ liệu văn bản, kiểu dữ liệu và đơn vị đo lường.
-    """
-    logger.info("Bước 3.5 — Chuẩn hóa dữ liệu (Standardization)...")
 
-    # Chuẩn hóa dữ liệu text
-
-    text_cols = [
-        "country",
-        "state",
-        "city",
-        "region",
-        "segment",
-        "category",
-        "sub_category",
-        "customer_name",
-        "product_name"
-    ]
-
-    for col in text_cols:
-        if col in df.columns:
-            df[col] = (
-                df[col]
-                .astype(str)
-                .str.strip()
-                .str.title()
-            )
-
-    # Chuẩn hóa Postal Code
-
-    if "postal_code" in df.columns:
-        df["postal_code"] = (
-            df["postal_code"]
-            .astype(str)
-            .str.strip()
-        )
-
-    # Chuẩn hóa số lượng
-
-    if "quantity" in df.columns:
-        df["quantity"] = df["quantity"].astype(int)
-
-    # Chuẩn hóa doanh thu
-
-    for col in ["sales", "profit", "shipping_cost"]:
-        if col in df.columns:
-            df[col] = df[col].round(2)
-
-    # Discount %
-
-    if "discount" in df.columns:
-        df["discount_pct"] = (df["discount"] * 100).round(0)
-
-    logger.info("Đã hoàn tất chuẩn hóa dữ liệu.")
-
-    _validate_schema(df, "standardize_data")
-
-    return df
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Tạo thêm các biến/cột đặc trưng mới phục vụ vẽ biểu đồ nâng cao."""
