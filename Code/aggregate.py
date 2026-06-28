@@ -1,8 +1,7 @@
-
 import logging
 import pandas as pd
 import numpy as np
-import config
+import config 
 
 logger = logging.getLogger("aggregate")
 
@@ -29,6 +28,58 @@ def get_descriptive_statistics(df: pd.DataFrame) -> pd.DataFrame:
     return stats
 
 
+# 1.5 Hàm Phân Tích Đơn Biến (Univariate Analysis)
+def get_univariate_financial_and_time(df: pd.DataFrame) -> dict:
+    """
+    Phân tích đơn biến chuyên sâu cho Doanh số, Lợi nhuận và Thời gian.
+    """
+    logger.info("Đang thực hiện phân tích đơn biến cho Sales, Profit và Time...")
+    uni_results = {}
+    
+    # A. PHÂN TÍCH ĐƠN BIẾN: DOANH SỐ (Sales Binning)
+    sales_bins = [0, 10, 50, 100, 500, 1000, 5000, np.inf]
+    sales_labels = ['Under $10', '$10-$50', '$50-$100', '$100-$500', '$500-$1000', '$1000-$5000', 'Over $5000']
+    
+    df['sales_group'] = pd.cut(df['sales'], bins=sales_bins, labels=sales_labels)
+    sales_counts = df['sales_group'].value_counts()
+    sales_pct = df['sales_group'].value_counts(normalize=True) * 100
+    
+    uni_results['uni_sales_distribution'] = pd.DataFrame({
+        'sales_range': sales_counts.index,
+        'order_count': sales_counts.values,
+        'percentage_or': sales_pct.values
+    }).sort_values(by='sales_range')
+
+    # B. PHÂN TÍCH ĐƠN BIẾN: LỢI NHUẬN (Profit Status)
+    df['profit_status'] = np.select(
+        condlist=[df['profit'] > 0, df['profit'] == 0, df['profit'] < 0],
+        choicelist=['Profitable (Lãi)', 'Breakeven (Hòa vốn)', 'Loss-making (Lỗ)'],
+        default='Unknown'
+    )
+    profit_counts = df['profit_status'].value_counts()
+    profit_pct = df['profit_status'].value_counts(normalize=True) * 100
+    
+    uni_results['uni_profit_status'] = pd.DataFrame({
+        'profit_status': profit_counts.index,
+        'order_count': profit_counts.values,
+        'percentage_or': profit_pct.values
+    })
+
+    # C. PHÂN TÍCH ĐƠN BIẾN: THỜI GIAN (Order Seasonality)
+    df['order_month_only'] = pd.to_datetime(df['order_date']).dt.month
+    
+    time_counts = df['order_month_only'].value_counts()
+    time_pct = df['order_month_only'].value_counts(normalize=True) * 100
+    
+    uni_results['uni_time_seasonality'] = pd.DataFrame({
+        'month': time_counts.index,
+        'order_count': time_counts.values,
+        'percentage_or': time_pct.values
+    }).sort_values(by='month')
+
+    return uni_results
+
+
 # 2. Hàm Phân tích Đa biến: Hiệu suất kinh doanh theo Năm và Thị trường
 def get_sales_performance(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -43,7 +94,6 @@ def get_sales_performance(df: pd.DataFrame) -> pd.DataFrame:
         avg_discount   = ('discount', 'mean')
     ).reset_index()
     
-    # Tính biên lợi nhuận sau khi group
     perf['profit_margin'] = perf['total_profit'] / perf['total_sales']
     return perf
 
@@ -63,7 +113,6 @@ def get_product_deep_dive(df: pd.DataFrame) -> pd.DataFrame:
     ).reset_index()
     
     product_analysis['profit_margin'] = product_analysis['total_profit'] / product_analysis['total_sales']
-    # Sắp xếp theo lợi nhuận giảm dần
     product_analysis = product_analysis.sort_values(by='total_profit', ascending=False)
     return product_analysis
 
@@ -91,106 +140,52 @@ def calculate_cohort_matrix(df: pd.DataFrame) -> pd.DataFrame:
     """
     logger.info("Phân tích nâng cao: Tính toán ma trận giữ chân khách hàng (Cohort Analysis)...")
     
-    # Nhóm theo Cohort Month và Cohort Index để đếm số lượng khách hàng duy nhất mua lại
     cohort_group = df.groupby(['cohort_month', 'cohort_index']).agg(
         unique_customers = ('customer_id', 'nunique')
     ).reset_index()
     
-    # Biến đổi bảng thành dạng Ma trận xoay (Pivot Table)
     cohort_matrix = cohort_group.pivot(
         index='cohort_month', 
         columns='cohort_index', 
         values='unique_customers'
     )
     
-    # Tính toán tỷ lệ phần trăm giữ chân (Retention Rate)
-    cohort_size = cohort_matrix.iloc[:, 0]  # Lấy số lượng khách hàng tháng đầu tiên làm gốc
-    cohort_retention = cohort_matrix.divide(cohort_size, axis=0)  # Chia tỷ lệ cho toàn ma trận
+    cohort_size = cohort_matrix.iloc[:, 0]
+    cohort_retention = cohort_matrix.divide(cohort_size, axis=0)
     
     return cohort_retention
 
 
 # ──────────────────────────────────────────────────────────────
-def get_univariate_financial_and_time(df: pd.DataFrame) -> dict:
-    """
-    Phân tích đơn biến chuyên sâu cho Doanh số, Lợi nhuận và Thời gian.
-    """
-    logger.info("Đang thực hiện phân tích đơn biến cho Sales, Profit và Time...")
-    uni_results = {}
-    
-    # ------------------------------------------------------------------
-    # A. PHÂN TÍCH ĐƠN BIẾN: DOANH SỐ (Sales Binning)
-    # Khảo sát phân phối các mức giá trị của đơn hàng
-    sales_bins = [0, 10, 50, 100, 500, 1000, 5000, np.inf]
-    sales_labels = ['Under $10', '$10-$50', '$50-$100', '$100-$500', '$500-$1000', '$1000-$5000', 'Over $5000']
-    
-    df['sales_group'] = pd.cut(df['sales'], bins=sales_bins, labels=sales_labels)
-    sales_counts = df['sales_group'].value_counts()
-    sales_pct = df['sales_group'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_sales_distribution'] = pd.DataFrame({
-        'sales_range': sales_counts.index,
-        'order_count': sales_counts.values,
-        'percentage_or': sales_pct.values
-    }).sort_values(by='sales_range') # Sắp xếp theo thứ tự khoảng giá
-
-    # ------------------------------------------------------------------
-    # B. PHÂN TÍCH ĐƠN BIẾN: LỢI NHUẬN (Profit Status)
-    # Khảo sát xem cơ cấu có bao nhiêu đơn hàng có lãi, hòa vốn, và lỗ
-    df['profit_status'] = np.select(
-        condlist=[df['profit'] > 0, df['profit'] == 0, df['profit'] < 0],
-        choicelist=['Profitable (Lãi)', 'Breakeven (Hòa vốn)', 'Loss-making (Lỗ)'],
-        default='Unknown'
-    )
-    profit_counts = df['profit_status'].value_counts()
-    profit_pct = df['profit_status'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_profit_status'] = pd.DataFrame({
-        'profit_status': profit_counts.index,
-        'order_count': profit_counts.values,
-        'percentage_or': profit_pct.values
-    })
-
-    # ------------------------------------------------------------------
-    # C. PHÂN TÍCH ĐƠN BIẾN: THỜI GIAN (Order Seasonality)
-    # Trích xuất tháng độc lập (từ tháng 1 đến tháng 12) để tìm quy luật mùa vụ không phụ thuộc vào năm
-    df['order_month_only'] = pd.to_datetime(df['order_date']).dt.month
-    
-    time_counts = df['order_month_only'].value_counts()
-    time_pct = df['order_month_only'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_time_seasonality'] = pd.DataFrame({
-        'month': time_counts.index,
-        'order_count': time_counts.values,
-        'percentage_or': time_pct.values
-    }).sort_values(by='month') # Sắp xếp từ tháng 1 đến tháng 12
-
-    return uni_results
-
 def run_all() -> None:
-    """Chạy toàn bộ pipeline phân tích và tổng hợp dữ liệu."""
+    """Chạy toàn bộ pipeline phân tích và tổng hợp dữ liệu sang CSV."""
     logger.info("=== BẮT ĐẦU TỔNG HỢP & PHÂN TÍCH DỮ LIỆU ===")
     try:
-        # 1. Đọc dữ liệu sạch từ data/cleaned/
-        cleaned_path = config.CLEANED_DIR / "superstore_cleaned.csv"
+        # Đọc dữ liệu sạch từ thư mục config
+        cleaned_path = config.CLEANED_CSV_PATH
         df = pd.read_csv(cleaned_path)
         logger.info("Đọc thành công dữ liệu sạch: %d dòng", len(df))
 
-        # Tự động tạo thư mục chứa kết quả phân tích nếu chưa có
-        output_dir = config.BASE_DIR / "data" / "analytics"
-        output_dir.mkdir(parents=True, exist_ok=True)
+        # Thiết lập đường dẫn đến thư mục 'analytics' lớn nằm trong 'Data dự án'
+        output_dir = config.CLEANED_DIR.parent / "analytics"
+        
+        import os
+        os.makedirs(output_dir, exist_ok=True)
 
-        # 2. Thực hiện Thống kê mô tả
+        # 2. Thực hiện Thống kê mô tả (Chỉ lưu CSV)
         stats_df = get_descriptive_statistics(df)
         stats_df.to_csv(output_dir / "descriptive_stats.csv", encoding="utf-8-sig")
+        print("\n--- BẢNG THỐNG KÊ MÔ TẢ TẠO RA TỪ CODE ---")
+        print(stats_df.round(2).to_string())
+        print("-" * 42 + "\n")
 
-        # 3. MỚI: Thực hiện phân tích đơn biến Doanh số, Lợi nhuận, Thời gian
+        # 3. Thực hiện phân tích đơn biến Doanh số, Lợi nhuận, Thời gian (Chỉ lưu CSV)
         uni_financial_time = get_univariate_financial_and_time(df)
         for file_name, uni_df in uni_financial_time.items():
             uni_df.to_csv(output_dir / f"{file_name}.csv", index=False, encoding="utf-8-sig")
-        logger.info("Đã xuất các file phân tích đơn biến tài chính và thời gian thành công!")
+        logger.info("Đã xuất các file phân tích đơn biến dạng CSV thành công!")
 
-        # 4. Chạy các hàm phân tích đa biến khác (Giữ nguyên phần cũ của bạn)
+        # 4. Chạy các hàm phân tích đa biến và chỉ lưu định dạng CSV
         perf_df = get_sales_performance(df)
         perf_df.to_csv(output_dir / "sales_performance.csv", index=False, encoding="utf-8-sig")
 
@@ -203,14 +198,14 @@ def run_all() -> None:
         cohort_df = calculate_cohort_matrix(df)
         cohort_df.to_csv(output_dir / "cohort_retention_matrix.csv", encoding="utf-8-sig")
 
-        logger.info("=== HOÀN TẤT PHÂN TÍCH — Các file đã được lưu tại data/analytics/ ===")
+        logger.info("=== HOÀN TẤT PHÂN TÍCH — Toàn bộ các file CSV đã nằm gọn gàng trong Data dự án/analytics/ ===")
 
     except FileNotFoundError:
         logger.error("Không tìm thấy file dữ liệu sạch. Vui lòng chạy cleaner.py trước!")
     except Exception as exc:
         logger.exception("Lỗi trong quá trình tổng hợp dữ liệu: %s", exc)
-        
+
+
 if __name__ == "__main__":
-    # Cấu hình log cơ bản để chạy độc lập
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     run_all()
