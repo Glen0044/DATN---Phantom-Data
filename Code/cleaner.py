@@ -1,4 +1,3 @@
-
 import logging
 from datetime import timedelta
 import pandas as pd
@@ -88,17 +87,9 @@ def standardize_data(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("Bước 3.5 — Chuẩn hóa dữ liệu (Standardization)...")
 
     # Chuẩn hóa dữ liệu text
-
     text_cols = [
-        "country",
-        "state",
-        "city",
-        "region",
-        "segment",
-        "category",
-        "sub_category",
-        "customer_name",
-        "product_name"
+        "country", "state", "city", "region", "segment", 
+        "category", "sub_category", "customer_name", "product_name"
     ]
 
     for col in text_cols:
@@ -111,7 +102,6 @@ def standardize_data(df: pd.DataFrame) -> pd.DataFrame:
             )
 
     # Chuẩn hóa Postal Code
-
     if "postal_code" in df.columns:
         df["postal_code"] = (
             df["postal_code"]
@@ -120,26 +110,22 @@ def standardize_data(df: pd.DataFrame) -> pd.DataFrame:
         )
 
     # Chuẩn hóa số lượng
-
     if "quantity" in df.columns:
         df["quantity"] = df["quantity"].astype(int)
 
-    # Chuẩn hóa doanh thu
-
+    # Chuẩn hóa doanh thu, lợi nhuận, chi phí vận chuyển
     for col in ["sales", "profit", "shipping_cost"]:
         if col in df.columns:
             df[col] = df[col].round(2)
 
-    # Discount %
-
+    # Tính toán thêm cột % Discount hiển thị số nguyên
     if "discount" in df.columns:
         df["discount_pct"] = (df["discount"] * 100).round(0)
 
     logger.info("Đã hoàn tất chuẩn hóa dữ liệu.")
-
     _validate_schema(df, "standardize_data")
-
     return df
+
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Tạo thêm các biến/cột đặc trưng mới phục vụ vẽ biểu đồ nâng cao."""
@@ -204,7 +190,7 @@ def run_all() -> None:
     """Hàm tổng điều phối chạy toàn bộ hệ thống pipeline."""
     logger.info("=== BẮT ĐẦU CHẠY PIPELINE LÀM SẠCH DỮ LIỆU ===")
     try:
-        # Hỗ trợ đọc file với các định dạng mã hóa ký tự khác nhau để tránh lỗi tiếng Trung/ký tự lạ
+        # Hỗ trợ đọc file với các định dạng mã hóa ký tự khác nhau
         try:
             df = pd.read_csv(config.RAW_DATA_PATH, encoding="utf-8")
         except UnicodeDecodeError:
@@ -212,22 +198,27 @@ def run_all() -> None:
             
         logger.info("Đọc thành công file dữ liệu gốc: %d dòng, %d cột.", *df.shape)
 
-        # Chạy tuần tự qua các bước phân tích
+        # Chạy tuần tự qua các bước phân tích và chuẩn hóa
         df = clean_basic_anomalies(df)
         df = handle_missing(df)
+        df = standardize_data(df)
         df = engineer_features(df)
         df = create_cohort_features(df)
 
-        # Lưu file dữ liệu tổng thể đã làm sạch
-        cleaned_path = config.CLEANED_DIR / "superstore_cleaned.csv"
-        df.to_csv(cleaned_path, index=False, encoding="utf-8-sig")
-        logger.info("Đã xuất file dữ liệu sạch: %s (%d dòng)", cleaned_path, len(df))
+        # 1. Lưu file dữ liệu tổng thể đã làm sạch (CSV & Excel)
+        df.to_csv(config.CLEANED_CSV_PATH, index=False, encoding="utf-8-sig")
+        logger.info("Đã xuất file dữ liệu sạch CSV: %s", config.CLEANED_CSV_PATH)
+        
+        df.to_excel(config.CLEANED_XLSX_PATH, index=False, engine='openpyxl')
+        logger.info("Đã xuất thêm file dữ liệu sạch Excel: %s", config.CLEANED_XLSX_PATH)
 
-        # Lưu file tổng hợp chỉ số RFM
+        # 2. Lưu file tổng hợp chỉ số RFM (CSV & Excel)
         rfm = calculate_rfm_base(df)
-        rfm_path = config.CLEANED_DIR / "rfm_base.csv"
-        rfm.to_csv(rfm_path, index=False, encoding="utf-8-sig")
-        logger.info("Đã xuất file phân tích phân khúc khách hàng: %s", rfm_path)
+        rfm.to_csv(config.RFM_CSV_PATH, index=False, encoding="utf-8-sig")
+        logger.info("Đã xuất file phân tích RFM CSV: %s", config.RFM_CSV_PATH)
+        
+        rfm.to_excel(config.RFM_XLSX_PATH, index=False, engine='openpyxl')
+        logger.info("Đã xuất thêm file phân tích RFM Excel: %s", config.RFM_XLSX_PATH)
 
         logger.info("=== HỆ THỐNG HOÀN THÀNH LÀM SẠCH VÀ SẴN SÀNG ĐỂ PHÂN TÍCH ===")
 

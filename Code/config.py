@@ -2,17 +2,27 @@ import os
 from pathlib import Path
 
 # Thư mục gốc của dự án
-BASE_DIR = Path(__file__).resolve().parent
+CURRENT_DIR = Path(__file__).resolve().parent
+BASE_DIR = CURRENT_DIR.parent
 
 # Đường dẫn đến file dữ liệu thô đầu vào
-# Đảm bảo bạn đặt file 'superstore.csv' cùng thư mục hoặc sửa đường dẫn tại đây
-RAW_DATA_PATH = BASE_DIR / "superstore.csv"
+RAW_DATA_PATH = Path("D:/DATN/DATN---Phantom-Data/Dataset/superstore.csv")
 
-# Thư mục lưu kết quả sau khi làm sạch
-CLEANED_DIR = BASE_DIR / "data" / "cleaned"
+# --- CẬP NHẬT ĐƯỜNG DẪN LƯU THEO Ý BẠN TẠI ĐÂY ---
+# Hệ thống sẽ tạo và lưu vào thư mục "Data dự án/cleaned"
+CLEANED_DIR = BASE_DIR / "Data dự án" / "cleaned"
 
-# Tự động tạo thư mục đầu ra nếu chưa tồn tại
+# Tự động tạo toàn bộ chuỗi thư mục lồng nhau nếu chưa tồn tại
 os.makedirs(CLEANED_DIR, exist_ok=True)
 
-# Số ngày cộng thêm sau ngày đặt hàng cuối cùng để làm ngày chốt tính RFM (Mặc định: 1 ngày)
+# --- ĐƯỜNG DẪN CÁC FILE ĐẦU RA ---
+# Định dạng CSV
+CLEANED_CSV_PATH = CLEANED_DIR / "superstore_cleaned.csv"
+RFM_CSV_PATH      = CLEANED_DIR / "rfm_base.csv"
+
+# Định dạng Excel (.xlsx)
+CLEANED_XLSX_PATH = CLEANED_DIR / "superstore_cleaned.xlsx"
+RFM_XLSX_PATH     = CLEANED_DIR / "rfm_base.xlsx"
+
+# Số ngày cộng thêm sau ngày đặt hàng cuối cùng để làm ngày chốt tính RFM
 SNAPSHOT_DATE_OFFSET = 1
