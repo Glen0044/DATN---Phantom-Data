@@ -549,6 +549,12 @@
         </metadata-records>
       </connection>
       <aliases enabled='yes' />
+      <column caption='Tổng số khách hàng' datatype='real' name='[Calculation_0962090119700480]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='COUNTD(Customer ID)' />
+      </column>
+      <column caption='First Order Date' datatype='date' name='[Calculation_0962090120302593]' role='dimension' type='ordinal'>
+        <calculation class='tableau' formula='{ FIXED [customer_id] : MIN([order_date]) }' />
+      </column>
       <column caption='Sheet1' datatype='table' name='[__tableau_internal_object_id__].[Sheet1_A19511725F6B49D68672A6508E0FB0C6]' role='measure' type='quantitative' />
       <column caption='Category' datatype='string' name='[category]' role='dimension' type='nominal' />
       <column caption='City' datatype='string' name='[city]' role='dimension' semantic-role='[City].[Name]' type='nominal' />
