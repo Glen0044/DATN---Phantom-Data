@@ -12,23 +12,7 @@ logger = logging.getLogger("aggregate")
 
 
 
-# 3. Hàm Phân tích Đa biến: Chi tiết Ngành hàng (Category & Sub-Category)
-def get_product_deep_dive(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Phân tích sâu hiệu suất tài chính theo Danh mục chính và Danh mục con để phát hiện hàng gánh lỗ.
-    """
-    logger.info("Phân tích đa biến: Bóc tách hiệu suất theo Ngành hàng (Category & Sub-Category)...")
-    
-    product_analysis = df.groupby(['category', 'sub_category']).agg(
-        total_sales    = ('sales', 'sum'),
-        total_profit   = ('profit', 'sum'),
-        avg_discount   = ('discount', 'mean'),
-        order_count    = ('order_id', 'nunique')
-    ).reset_index()
-    
-    product_analysis['profit_margin'] = product_analysis['total_profit'] / product_analysis['total_sales']
-    product_analysis = product_analysis.sort_values(by='total_profit', ascending=False)
-    return product_analysis
+
 
 
 # 4. Hàm Phân tích Đa biến: Hiệu suất Vận chuyển & Logistics
