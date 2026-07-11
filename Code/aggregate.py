@@ -9,22 +9,7 @@ logger = logging.getLogger("aggregate")
 
 
 
-# 2. Hàm Phân tích Đa biến: Hiệu suất kinh doanh theo Năm và Thị trường
-def get_sales_performance(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Phân tích mối quan hệ giữa Năm đặt hàng, Thị trường đối với Doanh số và Lợi nhuận.
-    """
-    logger.info("Phân tích đa biến: Tổng hợp hiệu suất kinh doanh theo Năm và Thị trường...")
-    
-    perf = df.groupby(['order_year', 'market']).agg(
-        total_sales    = ('sales', 'sum'),
-        total_profit   = ('profit', 'sum'),
-        total_quantity = ('quantity', 'sum'),
-        avg_discount   = ('discount', 'mean')
-    ).reset_index()
-    
-    perf['profit_margin'] = perf['total_profit'] / perf['total_sales']
-    return perf
+
 
 
 # 3. Hàm Phân tích Đa biến: Chi tiết Ngành hàng (Category & Sub-Category)
