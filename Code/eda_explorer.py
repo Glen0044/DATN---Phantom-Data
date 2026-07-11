@@ -44,12 +44,19 @@ def explore_raw_data():
         print(f"    - Số lượng dòng bị trùng lặp 100% tất cả các trường: {duplicate_count} dòng")
 
         # 4. Kiểm tra lỗi logic thời gian (Ngày giao trước ngày đặt)
-        # Ép kiểu tạm thời để kiểm tra lỗi logic hệ thống
-        order_dt = pd.to_datetime(df[df.columns[df.columns.str.lower().str.strip() == 'order date'][0]], errors='coerce')
-        ship_dt = pd.to_datetime(df[df.columns[df.columns.str.lower().str.strip() == 'ship date'][0]], errors='coerce')
-        logic_errors = (ship_dt < order_dt).sum()
-        print(f"\n[4] Kiểm tra lỗi logic hệ thống:")
-        print(f"    - Số dòng có ngày giao hàng trước ngày đặt hàng (Ship Date < Order Date): {logic_errors} dòng")
+        print("\n[4] Kiểm tra lỗi logic hệ thống:")
+        
+        # Sửa đổi: Tìm kiếm thông minh bằng từ khóa 'order' và 'ship' trong tên cột
+        order_col = [c for c in df.columns if 'order' in c.lower()]
+        ship_col = [c for c in df.columns if 'ship' in c.lower()]
+        
+        if order_col and ship_col:
+            order_dt = pd.to_datetime(df[order_col[0]], errors='coerce')
+            ship_dt = pd.to_datetime(df[ship_col[0]], errors='coerce')
+            logic_errors = (ship_dt < order_dt).sum()
+            print(f"    - Số dòng có ngày giao hàng trước ngày đặt hàng (Ship Date < Order Date): {logic_errors} dòng")
+        else:
+            print("    - Không tìm thấy cột ngày tháng tương ứng để kiểm tra logic.")
 
         print("\n" + "="*50)
         logger.info("=== KẾT THÚC BƯỚC KHÁM PHÁ — Dữ liệu đã sẵn sàng để lập quy trình làm sạch ===")
