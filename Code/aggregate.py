@@ -6,28 +6,6 @@ import config
 logger = logging.getLogger("aggregate")
 
 
-# 1. Hàm Thống kê mô tả (Descriptive Statistics)
-def get_descriptive_statistics(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Sử dụng NumPy và Pandas để tính toán các chỉ số tập trung (Mean, Median)
-    và chỉ số phân tán (Std, Min, Max, IQR) của các biến định lượng.
-    """
-    logger.info("Đang tính toán Thống kê mô tả (Descriptive Statistics)...")
-    
-    numeric_cols = ['sales', 'profit', 'discount', 'shipping_cost', 'ship_delay_days']
-    
-    # Tính toán các chỉ số cơ bản
-    stats = df[numeric_cols].describe().T
-    
-    # Bổ sung Trung vị (Median) và Biên độ phân tán (Range) bằng NumPy/Pandas
-    stats['median'] = df[numeric_cols].median()
-    stats['range'] = stats['max'] - stats['min']
-    
-    # Sắp xếp lại cột cho đẹp mắt
-    stats = stats[['count', 'mean', 'median', 'std', 'min', 'max', 'range', '25%', '75%']]
-    return stats
-
-
 # 1.5 Hàm Phân Tích Đơn Biến (Univariate Analysis)
 def get_univariate_financial_and_time(df: pd.DataFrame) -> dict:
     """
