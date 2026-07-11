@@ -20,9 +20,9 @@ def explore_raw_data():
         except UnicodeDecodeError:
             df = pd.read_csv(config.RAW_DATA_PATH, encoding="latin1")
 
-        print("\n" + "="*50)
-        print(" BÁO CÁO SỨC KHỎE DỮ LIỆU THÔ (RAW DATA REPORT)")
-        print("="*50)
+        print("\n" + "="*25)
+        print(" BÁO CÁO DỮ LIỆU THÔ")
+        print("="*25)
 
         # 1. Kiểm tra kích thước tổng quan
         print(f"\n[1] Tổng số dòng: {df.shape[0]} | Tổng số cột: {df.shape[1]}")
