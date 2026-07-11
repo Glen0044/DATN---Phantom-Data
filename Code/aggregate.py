@@ -6,56 +6,7 @@ import config
 logger = logging.getLogger("aggregate")
 
 
-# 1.5 Hàm Phân Tích Đơn Biến (Univariate Analysis)
-def get_univariate_financial_and_time(df: pd.DataFrame) -> dict:
-    """
-    Phân tích đơn biến chuyên sâu cho Doanh số, Lợi nhuận và Thời gian.
-    """
-    logger.info("Đang thực hiện phân tích đơn biến cho Sales, Profit và Time...")
-    uni_results = {}
-    
-    # A. PHÂN TÍCH ĐƠN BIẾN: DOANH SỐ (Sales Binning)
-    sales_bins = [0, 10, 50, 100, 500, 1000, 5000, np.inf]
-    sales_labels = ['Under $10', '$10-$50', '$50-$100', '$100-$500', '$500-$1000', '$1000-$5000', 'Over $5000']
-    
-    df['sales_group'] = pd.cut(df['sales'], bins=sales_bins, labels=sales_labels)
-    sales_counts = df['sales_group'].value_counts()
-    sales_pct = df['sales_group'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_sales_distribution'] = pd.DataFrame({
-        'sales_range': sales_counts.index,
-        'order_count': sales_counts.values,
-        'percentage_or': sales_pct.values
-    }).sort_values(by='sales_range')
 
-    # B. PHÂN TÍCH ĐƠN BIẾN: LỢI NHUẬN (Profit Status)
-    df['profit_status'] = np.select(
-        condlist=[df['profit'] > 0, df['profit'] == 0, df['profit'] < 0],
-        choicelist=['Profitable (Lãi)', 'Breakeven (Hòa vốn)', 'Loss-making (Lỗ)'],
-        default='Unknown'
-    )
-    profit_counts = df['profit_status'].value_counts()
-    profit_pct = df['profit_status'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_profit_status'] = pd.DataFrame({
-        'profit_status': profit_counts.index,
-        'order_count': profit_counts.values,
-        'percentage_or': profit_pct.values
-    })
-
-    # C. PHÂN TÍCH ĐƠN BIẾN: THỜI GIAN (Order Seasonality)
-    df['order_month_only'] = pd.to_datetime(df['order_date']).dt.month
-    
-    time_counts = df['order_month_only'].value_counts()
-    time_pct = df['order_month_only'].value_counts(normalize=True) * 100
-    
-    uni_results['uni_time_seasonality'] = pd.DataFrame({
-        'month': time_counts.index,
-        'order_count': time_counts.values,
-        'percentage_or': time_pct.values
-    }).sort_values(by='month')
-
-    return uni_results
 
 
 # 2. Hàm Phân tích Đa biến: Hiệu suất kinh doanh theo Năm và Thị trường
