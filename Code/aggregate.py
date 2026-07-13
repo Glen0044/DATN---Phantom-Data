@@ -18,27 +18,7 @@ logger = logging.getLogger("aggregate")
 
 
 
-# 5. Hàm Phân tích Đa biến Nâng cao: Ma trận Cohort (Cohort Retention Matrix)
-def calculate_cohort_matrix(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Xây dựng ma trận tỷ lệ giữ chân khách hàng qua các tháng (Customer Retention Rate).
-    """
-    logger.info("Phân tích nâng cao: Tính toán ma trận giữ chân khách hàng (Cohort Analysis)...")
-    
-    cohort_group = df.groupby(['cohort_month', 'cohort_index']).agg(
-        unique_customers = ('customer_id', 'nunique')
-    ).reset_index()
-    
-    cohort_matrix = cohort_group.pivot(
-        index='cohort_month', 
-        columns='cohort_index', 
-        values='unique_customers'
-    )
-    
-    cohort_size = cohort_matrix.iloc[:, 0]
-    cohort_retention = cohort_matrix.divide(cohort_size, axis=0)
-    
-    return cohort_retention
+
 
 
 # ──────────────────────────────────────────────────────────────
