@@ -15,20 +15,7 @@ logger = logging.getLogger("aggregate")
 
 
 
-# 4. Hàm Phân tích Đa biến: Hiệu suất Vận chuyển & Logistics
-def get_shipping_efficiency(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Phân tích mối tương quan giữa Hình thức vận chuyển, Mức độ ưu tiên đơn hàng đối với chi phí và số ngày trễ.
-    """
-    logger.info("Phân tích đa biến: Đánh giá hiệu suất Logistics & Giao hàng...")
-    
-    shipping = df.groupby(['ship_mode', 'order_priority']).agg(
-        avg_shipping_cost = ('shipping_cost', 'mean'),
-        avg_delay_days    = ('ship_delay_days', 'mean'),
-        total_orders      = ('order_id', 'nunique')
-    ).reset_index()
-    
-    return shipping
+
 
 
 # 5. Hàm Phân tích Đa biến Nâng cao: Ma trận Cohort (Cohort Retention Matrix)
