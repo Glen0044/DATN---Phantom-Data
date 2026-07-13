@@ -1,48 +1,49 @@
 -- Tạo bảng Staging lưu trữ
-CREATE TABLE dbo.StagingSuperstore (
-    category NVARCHAR(MAX),
-    city NVARCHAR(MAX),
-    country NVARCHAR(MAX),
-    customer_id NVARCHAR(MAX),
-    customer_name NVARCHAR(MAX),
-    discount NVARCHAR(MAX),
-    market NVARCHAR(MAX),
-    order_date NVARCHAR(MAX),
-    order_id NVARCHAR(MAX),
-    order_priority NVARCHAR(MAX),
-    product_id NVARCHAR(MAX),
-    product_name NVARCHAR(MAX),
-    profit NVARCHAR(MAX),
-    quantity NVARCHAR(MAX),
-    region NVARCHAR(MAX),
-    sales NVARCHAR(MAX),
-    segment NVARCHAR(MAX),
-    ship_date NVARCHAR(MAX),
-    ship_mode NVARCHAR(MAX),
-    shipping_cost NVARCHAR(MAX),
-    state NVARCHAR(MAX),
-    sub_category NVARCHAR(MAX),
-    profit_margin NVARCHAR(MAX),
-    ship_delay NVARCHAR(MAX),
-    order_year NVARCHAR(MAX),
-    order_quarter NVARCHAR(MAX),
-    order_month NVARCHAR(MAX),
-    cohort_month NVARCHAR(MAX),
-    cohort_index NVARCHAR(MAX)
+CREATE TABLE dbo.StagingSuperstore
+(
+    category NVARCHAR(50),
+    city NVARCHAR(100),
+    country NVARCHAR(100),
+    customer_id NVARCHAR(50),
+    customer_name NVARCHAR(150),
+    discount NVARCHAR(50),
+    market NVARCHAR(50),
+    order_date NVARCHAR(50),
+    order_id NVARCHAR(50),
+    order_priority NVARCHAR(50),
+    product_id NVARCHAR(50),
+    product_name NVARCHAR(500),
+    profit NVARCHAR(50),
+    quantity NVARCHAR(50),
+    region NVARCHAR(100),
+    sales NVARCHAR(50),
+    segment NVARCHAR(50),
+    ship_date NVARCHAR(50),
+    ship_mode NVARCHAR(50),
+    shipping_cost NVARCHAR(50),
+    state NVARCHAR(100),
+    sub_category NVARCHAR(100),
+    discount_pct NVARCHAR(50),
+    profit_margin NVARCHAR(100),
+    ship_delay_days NVARCHAR(50),
+    order_year NVARCHAR(50),
+    order_quarter NVARCHAR(50),
+    order_month NVARCHAR(50),
+    cohort_month NVARCHAR(50),
+    cohort_index NVARCHAR(50)
 );
 
--- Import data
 BULK INSERT dbo.StagingSuperstore
-FROM 'D:\DATN\DATN---Phantom-Data\Dataset\data\cleaned\superstore_sql_import.csv'
-WITH (
+FROM 'D:\DATN\DATN---Phantom-Data\Data dự án\cleaned\superstore_cleaned.csv'
+WITH
+(
     FORMAT = 'CSV',
     FIRSTROW = 2,
-    FIELDTERMINATOR = '|',
     FIELDQUOTE = '"',
     CODEPAGE = '65001',
-    ROWTERMINATOR = '0x0a',
     TABLOCK
 );
+
 -- Đếm số dòng:
 SELECT COUNT(*)
 FROM StagingSuperstore;
